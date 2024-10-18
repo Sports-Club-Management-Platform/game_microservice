@@ -1,3 +1,4 @@
+import logging
 import os
 from hashlib import md5
 from io import BytesIO
@@ -7,6 +8,8 @@ from PIL import Image as PILImage
 from PIL import ImageOps
 from starlette.datastructures import UploadFile as StarletteUploadFile
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 async def create_image(file: UploadFile, folder: str) -> str:
     return await process_image(file, folder)
@@ -24,6 +27,7 @@ async def process_image(file: UploadFile, folder: str) -> str:
     try:
         # Lê o conteúdo do arquivo
         if isinstance(file, StarletteUploadFile):
+            logger.info(f"Processing image: {file.filename}")
             file = await file.read()
         img_bytes = BytesIO(file)
         md5sum = md5(img_bytes.getbuffer())
@@ -32,7 +36,8 @@ async def process_image(file: UploadFile, folder: str) -> str:
         raise HTTPException(status_code=400, detail="Invalid image")
 
     # Verifica o formato da imagem
-    if img.format not in ["JPEG", "PNG", "BMP"]:
+    if img.format not in ["JPEG", "PNG", "BMP", "GIF"]:
+        logger.error(f"Invalid image format: {img.format}")
         raise HTTPException(status_code=400, detail="Invalid image format")
 
     # Corrige a orientação da imagem (EXIF) e converte para RGB

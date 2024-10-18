@@ -3,10 +3,10 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
+from crud.pavilionRepo import (create_pavilion, delete_pavilion,
+                               get_pavilion_by_id, update_pavilion)
 from db.database import get_db
 from models.pavilion import Pavilion as PavilionModel
-from repositories.pavilionRepo import (create_pavilion, delete_pavilion,
-                                       get_pavilion_by_id, update_pavilion)
 from schemas.pavilion import CreatePavilion, PavilionInDB, UpdatePavilion
 
 router = APIRouter(tags=["Pavilions"])

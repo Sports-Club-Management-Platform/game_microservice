@@ -3,11 +3,11 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from crud.gameRepo import (create_game, delete_game, get_all_games,
+                           get_all_games_except_next, get_game_by_id,
+                           get_next_game, update_game)
 from db.database import get_db
 from models.game import Game as GameModel
-from repositories.gameRepo import (create_game, delete_game, get_all_games,
-                                   get_all_games_except_next, get_game_by_id,
-                                   get_next_game, update_game)
 from schemas.game import GameCreate, GameInDB, GameUpdate
 
 router = APIRouter(tags=["Games"])

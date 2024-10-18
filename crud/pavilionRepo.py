@@ -6,9 +6,9 @@ from sqlalchemy import asc
 from sqlalchemy.orm import Session
 from starlette.datastructures import UploadFile as StarletteUploadFile
 
+from crud.imageRepo import create_image, update_image
 from db.database import get_db
 from models.pavilion import Pavilion as PavilionModel
-from repositories.imageRepo import create_image, update_image
 from schemas.pavilion import CreatePavilion, UpdatePavilion
 
 
