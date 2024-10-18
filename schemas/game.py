@@ -12,12 +12,12 @@ class Game(BaseModel):
     club_home_id: int      #int?
     club_visitor_id: int    #int?
     pavilion_id: int        #int?
-    finished: Optional[int] = None          #needed??
+    finished: Optional[bool] = None          #needed??
 
 class GameCreate(Game):
     pass
 
-class GameUpdate:
+class GameUpdate(Game):
     jornada: Optional[int] = None
     score_home: Optional[int] = None
     score_visitor: Optional[int] = None

@@ -1,10 +1,11 @@
 from contextlib import asynccontextmanager
 
-from db.create_database import create_tables
-from db.database import SessionLocal
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from routers import auth
+
+from db.create_database import create_tables
+from db.database import SessionLocal
+from routers import club, game, pavilion
 
 
 @asynccontextmanager
@@ -34,7 +35,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth.router)
+app.include_router(club.router)
+app.include_router(game.router)
+app.include_router(pavilion.router)
 
 
 @app.middleware("http")

@@ -13,4 +13,3 @@ class Club(Base):
     name = Column(String(200), index=True, nullable=False)
     image = Column(String(2048), nullable=False)
     pavilion_id = Column(Integer, ForeignKey("pavilions.id"), nullable=False)
-
