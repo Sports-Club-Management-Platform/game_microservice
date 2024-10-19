@@ -2,8 +2,9 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
 
-from db.create_database import create_tables
+from db.create_database import create_tables, populate_db
 from db.database import SessionLocal
 from routers import club, game, pavilion
 
@@ -11,6 +12,13 @@ from routers import club, game, pavilion
 @asynccontextmanager
 async def lifespan(app):
     create_tables()
+
+    db: Session = SessionLocal()
+    try:
+        await populate_db(db)
+    finally:
+        db.close()
+
     yield
 
 

@@ -3,11 +3,11 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
+from crud.clubRepo import (create_club, delete_club, get_all_clubs,
+                           get_club_by_id, get_pavilion_by_club_id,
+                           update_club)
 from db.database import get_db
 from models.club import Club as ClubModel
-from repositories.clubRepo import (create_club, delete_club, get_all_clubs,
-                                   get_club_by_id, get_pavilion_by_club_id,
-                                   update_club)
 from schemas.club import ClubCreate, ClubInDB, ClubUpdate
 
 router = APIRouter(tags=["Clubs"])
