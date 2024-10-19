@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
 from crud.clubRepo import (create_club, delete_club, get_all_clubs,
@@ -13,7 +13,8 @@ from schemas.club import ClubCreate, ClubInDB, ClubUpdate
 router = APIRouter(tags=["Clubs"])
 
 @router.post("/clubs", response_model=ClubInDB)
-async def create_club_endpoint(new_club: ClubCreate, image: UploadFile, db: Session = Depends(get_db)):
+async def create_club_endpoint(name: str = Form(...), pavilion_id: int = Form(...), image: UploadFile = File(...), db: Session = Depends(get_db)):
+    new_club = ClubCreate(name=name, pavilion_id=pavilion_id)
     return await create_club(new_club, image, db)
 
 @router.get("/clubs/{club_id}", response_model=ClubInDB)
@@ -28,7 +29,8 @@ def get_all_clubs_endpoint(db: Session = Depends(get_db)):
     return get_all_clubs(db)
 
 @router.put("/clubs/{club_id}", response_model=ClubInDB)
-async def update_club_endpoint(club_id: int, club_data: ClubUpdate, image: Optional[UploadFile] = File(None), db: Session = Depends(get_db)):
+async def update_club_endpoint(club_id: int, name: Optional[str] = Form(None), pavilion_id: Optional[int] = Form(None), image: Optional[UploadFile] = File(None), db: Session = Depends(get_db)):
+    club_data = ClubUpdate(name=name, pavilion_id=pavilion_id)
     return await update_club(club_id, club_data, image, db)
 
 @router.delete("/clubs/{club_id}")
