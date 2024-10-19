@@ -2,7 +2,7 @@ name: Test
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, "SCRUM-31-Games-API"]
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:
