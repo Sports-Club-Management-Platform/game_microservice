@@ -1,6 +1,11 @@
+import logging
 import os
 from datetime import datetime
+from typing import Optional
 
+import boto3
+from botocore.exceptions import ClientError, NoCredentialsError
+from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, UploadFile, status
 from sqlalchemy import asc
 from sqlalchemy.orm import Session
@@ -11,6 +16,19 @@ from db.database import get_db
 from models.pavilion import Pavilion as PavilionModel
 from schemas.pavilion import CreatePavilion, UpdatePavilion
 
+load_dotenv()
+
+S3_BUCKET_NAME = os.getenv("AWS_S3_BUCKET")
+S3_REGION_NAME = os.getenv("AWS_REGION")
+S3_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY_ID")
+S3_SECRET_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+
+s3_client = boto3.client(
+    's3',
+    region_name=S3_REGION_NAME,
+    aws_access_key_id=S3_ACCESS_KEY,
+    aws_secret_access_key=S3_SECRET_KEY
+)
 
 async def create_pavilion(new_pavilion: CreatePavilion, image: UploadFile, db: Session):
     if image is None:
@@ -42,25 +60,29 @@ def get_pavilion_by_id(pavilion_id: int, db: Session):
     
     return pavilion
 
-async def update_pavilion(pavilion_id: int, pavilion_data: UpdatePavilion, image: UploadFile, db: Session):
+async def update_pavilion(pavilion_id: int, pavilion_data: UpdatePavilion, image: Optional[UploadFile], db: Session):
+    logging.info(f"Updating pavilion with ID: {pavilion_id}")
     pavilion = db.query(PavilionModel).filter(PavilionModel.id == pavilion_id).first()
     
     if not pavilion:
+        logging.error("Pavilion not found")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pavilion not found")
-    
-    if image is None:
-        raise HTTPException(status_code=400, detail="Image file is required")
 
-    img_path = await update_image(image, f"pavilions/{pavilion_id}")
-    pavilion.image = f"/{img_path}"
+    if image:
+        logging.info(f"Image provided: {image.filename}")
+        img_path = await update_image(image, f"pavilions/{pavilion_id}")
+        logging.info(f"Image updated at path: {img_path}")
+        pavilion.image = f"/{img_path}"
     
     for key, value in pavilion_data.dict(exclude_unset=True).items():
-        if key != "image":
+        if value is not None:
+            logging.info(f"Updating field {key} to {value}")
             setattr(pavilion, key, value)
     
     db.commit()
     db.refresh(pavilion)
     
+    logging.info(f"Pavilion updated: {pavilion}")
     return pavilion
 
 def delete_pavilion(pavilion_id: int, db: Session):
@@ -70,13 +92,16 @@ def delete_pavilion(pavilion_id: int, db: Session):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pavilion not found")
     
     if pavilion.image:
-        # O campo 'image' armazena o caminho da imagem sem a parte 'static/'
-        image_path = os.path.join("static", pavilion.image)
-        if os.path.exists(image_path):
-            os.remove(image_path)
-        else:
-            raise HTTPException(status_code=400, detail="Image file not found")
-    
+        # O campo 'image' armazena a URL completa da imagem no bucket S3
+        image_url = pavilion.image
+        # Extrai a chave do objeto S3 da URL
+        image_key = image_url.split(f"{S3_BUCKET_NAME}/")[-1]
+
+        try:
+            s3_client.delete_object(Bucket=S3_BUCKET_NAME, Key=image_key)
+        except ClientError as e:
+            raise HTTPException(status_code=400, detail=f"Error deleting image from S3: {e}")
+
     db.delete(pavilion)
     db.commit()
     

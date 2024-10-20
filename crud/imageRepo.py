@@ -48,6 +48,7 @@ async def process_image(file: UploadFile, folder: str) -> str:
         md5sum = md5(img_bytes.getbuffer())
         img = PILImage.open(img_bytes)
     except Exception as e:
+        logger.error(f"Error processing image: {str(e)}")
         raise HTTPException(status_code=400, detail="Invalid image")
 
     # Check image format
