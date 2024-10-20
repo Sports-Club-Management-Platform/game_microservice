@@ -15,7 +15,7 @@ s3 = boto3.client('s3',
     aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
     region_name=os.getenv('AWS_REGION'))
 
-S3_BUCKET_NAME = os.getenv("AWS_S3_BUCKET")
+AWS_S3_BUCKET = os.getenv("AWS_S3_BUCKET")
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -27,10 +27,10 @@ async def create_image(file: UploadFile, folder: str) -> str:
 async def update_image(file: UploadFile, folder: str) -> str:
     try:
         # List existing images in the folder and delete them from S3
-        response = s3.list_objects_v2(Bucket=S3_BUCKET_NAME, Prefix=f"{folder}/")
+        response = s3.list_objects_v2(Bucket=AWS_S3_BUCKET, Prefix=f"{folder}/")
         if 'Contents' in response:
             for obj in response['Contents']:
-                s3.delete_object(Bucket=S3_BUCKET_NAME, Key=obj['Key'])
+                s3.delete_object(Bucket=AWS_S3_BUCKET, Key=obj['Key'])
     except ClientError as e:
         logger.error(f"Error deleting old images from S3: {str(e)}")
         raise HTTPException(status_code=500, detail="Error updating image in S3")
@@ -71,7 +71,7 @@ async def process_image(file: UploadFile, folder: str) -> str:
     try:
         # Upload the image to S3
         s3.put_object(
-            Bucket=S3_BUCKET_NAME,
+            Bucket=AWS_S3_BUCKET,
             Key=img_path,
             Body=img_buffer,
             ContentType='image/jpeg',
@@ -86,5 +86,5 @@ async def process_image(file: UploadFile, folder: str) -> str:
         raise HTTPException(status_code=500, detail="Failed to upload image to S3")
 
     # Return the full S3 URL of the uploaded image
-    s3_url = f"https://{S3_BUCKET_NAME}.s3.amazonaws.com/{img_path}"
+    s3_url = f"https://{AWS_S3_BUCKET}.s3.amazonaws.com/{img_path}"
     return s3_url

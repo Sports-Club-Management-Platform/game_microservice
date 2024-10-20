@@ -18,7 +18,7 @@ from schemas.club import ClubCreate, ClubUpdate
 
 load_dotenv()
 
-S3_BUCKET_NAME = os.getenv("AWS_S3_BUCKET")
+AWS_S3_BUCKET = os.getenv("AWS_S3_BUCKET")
 S3_REGION_NAME = os.getenv("AWS_REGION")
 S3_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY_ID")
 S3_SECRET_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
@@ -93,10 +93,10 @@ def delete_club(club_id: int, db: Session):
         # O campo 'image' armazena a URL completa da imagem no bucket S3
         image_url = club.image
         # Extrai a chave do objeto S3 da URL
-        image_key = image_url.split(f"{S3_BUCKET_NAME}/")[-1]
+        image_key = image_url.split(f"{AWS_S3_BUCKET}/")[-1]
 
         try:
-            s3_client.delete_object(Bucket=S3_BUCKET_NAME, Key=image_key)
+            s3_client.delete_object(Bucket=AWS_S3_BUCKET, Key=image_key)
         except ClientError as e:
             raise HTTPException(status_code=400, detail=f"Error deleting image from S3: {e}")
 
