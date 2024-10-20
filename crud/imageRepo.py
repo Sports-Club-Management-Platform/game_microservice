@@ -3,10 +3,19 @@ import os
 from hashlib import md5
 from io import BytesIO
 
+import boto3
+from botocore.exceptions import ClientError, NoCredentialsError
 from fastapi import Depends, HTTPException, UploadFile
 from PIL import Image as PILImage
 from PIL import ImageOps
 from starlette.datastructures import UploadFile as StarletteUploadFile
+
+s3 = boto3.client('s3',
+    aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+    aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+    region_name=os.getenv('AWS_REGION'))
+
+S3_BUCKET_NAME = os.getenv("AWS_S3_BUCKET")
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -16,16 +25,22 @@ async def create_image(file: UploadFile, folder: str) -> str:
 
 
 async def update_image(file: UploadFile, folder: str) -> str:
-    previous_images = [f for f in os.listdir(f"static/{folder}") if f.endswith(".jpg")]
-    for old_image in previous_images:
-        os.remove(os.path.join(f"static/{folder}", old_image))
+    try:
+        # List existing images in the folder and delete them from S3
+        response = s3.list_objects_v2(Bucket=S3_BUCKET_NAME, Prefix=f"{folder}/")
+        if 'Contents' in response:
+            for obj in response['Contents']:
+                s3.delete_object(Bucket=S3_BUCKET_NAME, Key=obj['Key'])
+    except ClientError as e:
+        logger.error(f"Error deleting old images from S3: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error updating image in S3")
 
     return await process_image(file, folder)
 
 
 async def process_image(file: UploadFile, folder: str) -> str:
     try:
-        # Lê o conteúdo do arquivo
+        # Read file content
         if isinstance(file, StarletteUploadFile):
             logger.info(f"Processing image: {file.filename}")
             file = await file.read()
@@ -35,28 +50,40 @@ async def process_image(file: UploadFile, folder: str) -> str:
     except Exception as e:
         raise HTTPException(status_code=400, detail="Invalid image")
 
-    # Verifica o formato da imagem
+    # Check image format
     if img.format not in ["JPEG", "PNG", "BMP", "GIF"]:
         logger.error(f"Invalid image format: {img.format}")
         raise HTTPException(status_code=400, detail="Invalid image format")
 
-    # Corrige a orientação da imagem (EXIF) e converte para RGB
+    # Fix image orientation and convert to RGB
     img = ImageOps.exif_transpose(img)
     img = img.convert("RGB")
 
-    # Cria o diretório, se ainda não existir
-    os.makedirs(f"static/{folder}", exist_ok=True)
+    # Create the image path using the MD5 hash
+    img_path = f"{folder}/{md5sum.hexdigest()}.jpg"
 
-    # Define o caminho da imagem usando o hash MD5
-    img_path = f"/{folder}/{md5sum.hexdigest()}.jpg"
+    # Save the image to a BytesIO object
+    img_buffer = BytesIO()
+    img.save(img_buffer, format="JPEG", quality="web_high", optimize=True, progressive=True)
+    img_buffer.seek(0)
 
-    # Salva a nova imagem no caminho especificado
-    img.save(
-        f"static{img_path}",
-        format="JPEG",
-        quality="web_high",
-        optimize=True,
-        progressive=True,
-    )
+    try:
+        # Upload the image to S3
+        s3.put_object(
+            Bucket=S3_BUCKET_NAME,
+            Key=img_path,
+            Body=img_buffer,
+            ContentType='image/jpeg',
+            ACL='public-read'  # Permitir leitura pública
+        )
+        logger.info(f"Image successfully uploaded to S3 at: {img_path}")
+    except NoCredentialsError as e:
+        logger.error(f"Credentials not available: {str(e)}")
+        raise HTTPException(status_code=500, detail="S3 credentials not available")
+    except ClientError as e:
+        logger.error(f"Failed to upload image to S3: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to upload image to S3")
 
-    return img_path  # Retorna o caminho da nova imagem
+    # Return the full S3 URL of the uploaded image
+    s3_url = f"https://{S3_BUCKET_NAME}.s3.amazonaws.com/{img_path}"
+    return s3_url
