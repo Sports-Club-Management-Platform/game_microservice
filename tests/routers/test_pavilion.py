@@ -140,7 +140,7 @@ def test_update_pavilion(mock_process_image, mock_db):
     assert mock_db.commit.called is True
 
 
-# Teste para deletar um pavilhão
+# Teste para eliminar um pavilhão
 @patch("crud.pavilionRepo.s3_client.delete_object")
 def test_delete_pavilion(mock_s3_delete, mock_db):
     pavilion_data = PavilionModel(id=1, name="Test Pavilion", location="Test Location", image="https://clubs-and-pavilions-photos-bucket.s3.amazonaws.com/pavilions/1/test_image.jpg")
