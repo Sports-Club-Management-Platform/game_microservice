@@ -114,9 +114,11 @@ def test_get_pavilion_by_id_not_found(mock_db):
     assert response.json()["detail"] == "Pavilion not found"
 
 # Teste para atualizar um pavilhão
+@patch("crud.imageRepo.update_image")
 @patch("crud.imageRepo.process_image")
-def test_update_pavilion(mock_process_image, mock_db):
+def test_update_pavilion(mock_process_image, mock_update_image, mock_db):
     mock_process_image.return_value = "path/to/new_pavilion_image.jpg"
+    mock_update_image.return_value = "path/to/new_pavilion_image.jpg"
 
     pavilion_data = PavilionModel(id=1, name="Test Pavilion", location="Test Location", image="path/to/image.jpg")
     mock_db.query.return_value.filter.return_value.first.return_value = pavilion_data

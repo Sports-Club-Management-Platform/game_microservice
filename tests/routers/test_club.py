@@ -124,9 +124,11 @@ def test_get_all_clubs(mock_db):
     assert mock_db.query.called is True
 
 # Teste para atualizar um clube
+@patch("crud.imageRepo.update_image")
 @patch("crud.imageRepo.process_image")
-def test_update_club(mock_process_image, mock_db):
+def test_update_club(mock_process_image, mock_update_image, mock_db):
     mock_process_image.return_value = "path/to/new_club_image.jpg"
+    mock_update_image.return_value = "path/to/new_club_image.jpg"
 
     club_data = ClubModel(id=1, name="Test Club", pavilion_id=1, image="path/to/image.jpg")
     mock_db.query.return_value.filter.return_value.first.return_value = club_data
