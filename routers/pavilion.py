@@ -13,6 +13,9 @@ router = APIRouter(tags=["Pavilions"])
 
 @router.post("/pavilions", response_model=PavilionInDB)
 async def create_pavilion_endpoint(name: str = Form(...), location: str = Form(...), location_link: Optional[str] = Form(None), image: UploadFile = File(...), db: Session = Depends(get_db)):
+    if not name.strip() or not location.strip() or not location_link.strip():
+        raise HTTPException(status_code=400, detail="Name, location, and location link are required and cannot be empty")
+    
     new_pavilion = CreatePavilion(name=name, location=location, location_link=location_link)
     return await create_pavilion(new_pavilion, image, db)
 

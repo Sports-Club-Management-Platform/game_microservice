@@ -61,7 +61,8 @@ def update_game(game_id: int, game_data: GameUpdate, db: Session):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Game not found")
     
     for key, value in game_data.dict(exclude_unset=True).items():
-        setattr(game, key, value)
+        if value is not None:
+            setattr(game, key, value)
     
     db.commit()
     db.refresh(game)

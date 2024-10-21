@@ -14,6 +14,9 @@ router = APIRouter(tags=["Clubs"])
 
 @router.post("/clubs", response_model=ClubInDB)
 async def create_club_endpoint(name: str = Form(...), pavilion_id: int = Form(...), image: UploadFile = File(...), db: Session = Depends(get_db)):
+    if not name.strip() or not pavilion_id:
+        raise HTTPException(status_code=400, detail="Name and pavilion_id are required and cannot be empty")
+    
     new_club = ClubCreate(name=name, pavilion_id=pavilion_id)
     return await create_club(new_club, image, db)
 
