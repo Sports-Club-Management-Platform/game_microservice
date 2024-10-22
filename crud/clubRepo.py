@@ -24,11 +24,16 @@ S3_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY_ID")
 S3_SECRET_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 
 s3_client = boto3.client(
-    's3',
+    "s3",
     region_name=S3_REGION_NAME,
     aws_access_key_id=S3_ACCESS_KEY,
-    aws_secret_access_key=S3_SECRET_KEY
+    aws_secret_access_key=S3_SECRET_KEY,
 )
+
+club_not_found_exception = HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND, detail="Club not found"
+)
+
 
 async def create_club(new_club: ClubCreate, image: UploadFile, db: Session):
     if image is None:
@@ -37,7 +42,7 @@ async def create_club(new_club: ClubCreate, image: UploadFile, db: Session):
     new_club_record = ClubModel(
         name=new_club.name,
         pavilion_id=new_club.pavilion_id,
-        image=""  # Temporariamente vazio
+        image="",  # Temporariamente vazio
     )
     db.add(new_club_record)
     db.commit()
@@ -51,44 +56,52 @@ async def create_club(new_club: ClubCreate, image: UploadFile, db: Session):
 
     return new_club_record
 
+
 def get_club_by_id(club_id: int, db: Session):
     club = db.query(ClubModel).filter(ClubModel.id == club_id).first()
-    
+
     if not club:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Club not found")
-    
+        raise club_not_found_exception
+
     return club
+
 
 def get_all_clubs(db: Session):
     clubs = db.query(ClubModel).all()
-    
+
     return clubs
 
-async def update_club(club_id: int, club_data: ClubUpdate, image: Optional[UploadFile], db: Session):
+
+async def update_club(
+    club_id: int, club_data: ClubUpdate, image: Optional[UploadFile], db: Session
+):
     club = db.query(ClubModel).filter(ClubModel.id == club_id).first()
-    
+
     if not club:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Club not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Club not found"
+        )
 
     if image:
         img_path = await update_image(image, f"clubs/{club_id}")
         club.image = f"/{img_path}"
-    
+
     for key, value in club_data.dict(exclude_unset=True).items():
         if value is not None:
             setattr(club, key, value)
-    
+
     db.commit()
     db.refresh(club)
-    
+
     return club
+
 
 def delete_club(club_id: int, db: Session):
     club = db.query(ClubModel).filter(ClubModel.id == club_id).first()
 
     if not club:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Club not found")
-    
+        raise club_not_found_exception
+
     if club.image:
         # O campo 'image' armazena a URL completa da imagem no bucket S3
         image_url = club.image
@@ -98,23 +111,31 @@ def delete_club(club_id: int, db: Session):
         try:
             s3_client.delete_object(Bucket=AWS_S3_BUCKET, Key=image_key)
         except ClientError as e:
-            raise HTTPException(status_code=400, detail=f"Error deleting image from S3: {e}")
+            raise HTTPException(
+                status_code=400, detail=f"Error deleting image from S3: {e}"
+            )
 
     db.delete(club)
     db.commit()
-    
+
     return {"detail": "Club deleted successfully"}
+
 
 def get_pavilion_by_club_id(club_id: int, db: Session):
     club = db.query(ClubModel).filter(ClubModel.id == club_id).first()
 
     if not club:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Club not found")
-    
-    pavilion = db.query(PavilionModel).filter(PavilionModel.id == club.pavilion_id).first()
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Club not found"
+        )
+
+    pavilion = (
+        db.query(PavilionModel).filter(PavilionModel.id == club.pavilion_id).first()
+    )
 
     if not pavilion:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pavilion not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Pavilion not found"
+        )
 
     return pavilion
-
