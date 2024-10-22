@@ -78,9 +78,7 @@ async def update_club(
     club = db.query(ClubModel).filter(ClubModel.id == club_id).first()
 
     if not club:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Club not found"
-        )
+        raise club_not_found_exception
 
     if image:
         img_path = await update_image(image, f"clubs/{club_id}")
@@ -125,9 +123,7 @@ def get_pavilion_by_club_id(club_id: int, db: Session):
     club = db.query(ClubModel).filter(ClubModel.id == club_id).first()
 
     if not club:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Club not found"
-        )
+        raise club_not_found_exception
 
     pavilion = (
         db.query(PavilionModel).filter(PavilionModel.id == club.pavilion_id).first()
