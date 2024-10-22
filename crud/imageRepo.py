@@ -8,8 +8,11 @@ from PIL import Image as PILImage
 from PIL import ImageOps
 from starlette.datastructures import UploadFile as StarletteUploadFile
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
 
 async def create_image(file: UploadFile, folder: str) -> str:
     return await process_image(file, folder)
@@ -32,7 +35,7 @@ async def process_image(file: UploadFile, folder: str) -> str:
         img_bytes = BytesIO(file)
         md5sum = md5(img_bytes.getbuffer())
         img = PILImage.open(img_bytes)
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=400, detail="Invalid image")
 
     # Verifica o formato da imagem
