@@ -2,7 +2,7 @@ from io import BytesIO
 from unittest.mock import MagicMock, patch
 
 import pytest
-from fastapi import UploadFile
+from fastapi import HTTPException, UploadFile
 from PIL import Image
 
 from crud.imageRepo import create_image, process_image, update_image
@@ -79,3 +79,39 @@ async def test_process_image(mock_s3_client, mock_upload_file):
 
     # Assert that the returned URL is correct
     assert "https://" in result
+
+# Teste para exceção lançada ao processar uma imagem inválida
+@pytest.mark.asyncio
+async def test_process_image_invalid_image():
+    # Simula um arquivo inválido que não pode ser aberto como imagem
+    invalid_file = UploadFile(filename="invalid.txt", file=BytesIO(b"not_an_image"))
+
+    with pytest.raises(HTTPException) as exc_info:
+        await process_image(invalid_file, "test_folder")
+
+    # Verifica se o status code da exceção é 400 e a mensagem é 'Invalid image'
+    assert exc_info.value.status_code == 400
+    assert exc_info.value.detail == "Invalid image"
+
+# Teste para exceção lançada ao usar um formato de imagem não suportado
+@pytest.mark.asyncio
+async def test_process_image_invalid_format(monkeypatch):
+    # Simula uma imagem com formato inválido (não JPEG, PNG, BMP, GIF)
+    img_mock = MagicMock()
+    img_mock.format = "TIFF"  # Formato não suportado
+
+    def mock_open_image(*args, **kwargs):
+        return img_mock
+
+    # Substitui PIL.Image.open para retornar a imagem com formato não suportado
+    monkeypatch.setattr("PIL.Image.open", mock_open_image)
+
+    # Cria um UploadFile válido (o formato será definido pelo mock)
+    valid_file = UploadFile(filename="test_image.tiff", file=BytesIO(b"valid_image_content"))
+
+    with pytest.raises(HTTPException) as exc_info:
+        await process_image(valid_file, "test_folder")
+
+    # Verifica se o status code da exceção é 400 e a mensagem é 'Invalid image format'
+    assert exc_info.value.status_code == 400
+    assert exc_info.value.detail == "Invalid image format"
