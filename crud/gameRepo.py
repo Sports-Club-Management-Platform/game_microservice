@@ -75,7 +75,8 @@ def update_game(game_id: int, game_data: GameUpdate, db: Session):
         raise game_not_found_exception
 
     for key, value in game_data.dict(exclude_unset=True).items():
-        setattr(game, key, value)
+        if value is not None:
+            setattr(game, key, value)
 
     db.commit()
     db.refresh(game)
