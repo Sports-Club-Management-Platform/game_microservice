@@ -100,7 +100,7 @@ async def populate_db(session: Session):
                     "jornada": 2,
                     "date_time": "2024-10-26 17:00:00", 
                     "club_home_id": 4,  
-                    "club_visitor_id": 2, 
+                    "club_visitor_id": 1, 
                     "pavilion_id": 4,  
                     "finished": False 
                 },
