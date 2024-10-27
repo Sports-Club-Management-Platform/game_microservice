@@ -135,7 +135,7 @@ async def populate_db(session: Session):
                     "club_visitor_id": 1,
                     "pavilion_id": 5,
                     "finished": False
-                }
+                },
             ]
         # Adiciona jogos ao banco de dados
         for game_data in games:
