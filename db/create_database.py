@@ -128,6 +128,14 @@ async def populate_db(session: Session):
                     "pavilion_id": 1,
                     "finished": False
                 },
+                {
+                    "jornada": 6,
+                    "date_time": "2024-11-16 18:30:00",
+                    "club_home_id": 5,
+                    "club_visitor_id": 1,
+                    "pavilion_id": 5,
+                    "finished": False
+                }
             ]
         # Adiciona jogos ao banco de dados
         for game_data in games:
