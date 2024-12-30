@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+from starlette import status
 
 from db.create_database import create_tables, populate_db
 from db.database import SessionLocal
@@ -20,18 +21,17 @@ async def lifespan(app):
     yield
 
 
-
 app = FastAPI(
     lifespan=lifespan,
     title="ClubSync Game_Microservice API",
     version="0.0.1",
-    docs_url="/docs",
-    redoc_url="/redoc",
-    openapi_url="/openapi.json",
+    docs_url="/game/v1/docs",
+    redoc_url="/game/v1/redoc",
+    openapi_url="/game/v1/openapi.json",
     contact={
         "name": "ClubSync",
     },
-    servers=[{"url": "http://localhost:8002", "description": "Local server"}],
+    root_path="/game/v1/",
 )
 
 app.add_middleware(
@@ -41,6 +41,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get(
+    "/health",
+    tags=["healthcheck"],
+    summary="Perform a Health Check",
+    response_description="Return HTTP Status Code 200 (OK)",
+    status_code=status.HTTP_200_OK,
+)
+def get_health():
+    return {"status": "ok"}
+
 
 app.include_router(club.router)
 app.include_router(game.router)
