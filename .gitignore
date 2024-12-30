@@ -162,6 +162,3 @@ cython_debug/
 .DS_Store
 
 .vscode
-
-# ignore static folder
-static/
