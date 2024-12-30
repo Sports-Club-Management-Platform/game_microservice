@@ -25,9 +25,9 @@ app = FastAPI(
     lifespan=lifespan,
     title="ClubSync Game_Microservice API",
     version="0.0.1",
-    docs_url="/game/v1/docs",
-    redoc_url="/game/v1/redoc",
-    openapi_url="/game/v1/openapi.json",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json",
     contact={
         "name": "ClubSync",
     },
