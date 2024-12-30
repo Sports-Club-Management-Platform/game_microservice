@@ -31,7 +31,7 @@ app = FastAPI(
     contact={
         "name": "ClubSync",
     },
-    root_path="/game/v1/",
+    root_path="/games/v1/",
 )
 
 app.add_middleware(
