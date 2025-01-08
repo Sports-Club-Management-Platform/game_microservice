@@ -1,9 +1,18 @@
 [tool.poetry]
-name = "game-microservice"
+name = "game_microservice"
 version = "0.1.0"
 description = ""
 authors = ["Joaquim Rosa"]
 readme = "README.md"
+
+packages = [
+    { include = "crud" },
+    { include = "db" },
+    { include = "models" },
+    { include = "routers" },
+    { include = "schemas" },
+    { include = "tests" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.12"
