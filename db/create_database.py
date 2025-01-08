@@ -94,7 +94,7 @@ async def populate_db(session: Session):
                     "club_home_id": 1, 
                     "club_visitor_id": 2, 
                     "pavilion_id": 1, 
-                    "finished": False
+                    "finished": True
                 },
                 {
                     "jornada": 2,
@@ -102,7 +102,7 @@ async def populate_db(session: Session):
                     "club_home_id": 4,  
                     "club_visitor_id": 1, 
                     "pavilion_id": 4,  
-                    "finished": False 
+                    "finished": True
                 },
                 {
                     "jornada": 3,
@@ -110,7 +110,7 @@ async def populate_db(session: Session):
                     "club_home_id": 1,
                     "club_visitor_id": 8,
                     "pavilion_id": 1,
-                    "finished": False
+                    "finished": True
                 },
                 {
                     "jornada": 4,
@@ -118,7 +118,7 @@ async def populate_db(session: Session):
                     "club_home_id": 6,
                     "club_visitor_id": 1,
                     "pavilion_id": 6,
-                    "finished": False
+                    "finished": True
                 },
                 {
                     "jornada": 5,
@@ -126,7 +126,7 @@ async def populate_db(session: Session):
                     "club_home_id": 1,
                     "club_visitor_id": 12,
                     "pavilion_id": 1,
-                    "finished": False
+                    "finished": True
                 },
                 {
                     "jornada": 6,
@@ -134,8 +134,96 @@ async def populate_db(session: Session):
                     "club_home_id": 5,
                     "club_visitor_id": 1,
                     "pavilion_id": 5,
+                    "finished": True
+                },
+                {
+                    "jornada": 7,
+                    "date_time": "2024-11-22 22:00:00",
+                    "club_home_id": 1,
+                    "club_visitor_id": 7,
+                    "pavilion_id": 1,
+                    "finished": True
+                },
+                {
+                    "jornada": 8,
+                    "date_time": "2024-12-07 15:00:00",
+                    "club_home_id": 3,
+                    "club_visitor_id": 1,
+                    "pavilion_id": 3,
+                    "finished": True
+                },
+                {
+                    "jornada": 9,
+                    "date_time": "2024-12-18 21:00:00",
+                    "club_home_id": 11,
+                    "club_visitor_id": 1,
+                    "pavilion_id": 11,
+                    "finished": True
+                },
+                {
+                    "jornada": 10,
+                    "date_time": "2025-01-04 22:00:00",
+                    "club_home_id": 1,
+                    "club_visitor_id": 13,
+                    "pavilion_id": 1,
+                    "finished": True
+                },
+                {
+                    "jornada": 11,
+                    "date_time": "2025-01-19 18:00:00",
+                    "club_home_id": 9,
+                    "club_visitor_id": 1,
+                    "pavilion_id": 9,
                     "finished": False
                 },
+                {
+                    "jornada": 12,
+                    "date_time": "2025-01-25 22:00:00",
+                    "club_home_id": 1,
+                    "club_visitor_id": 10,
+                    "pavilion_id": 1,
+                    "finished": False
+                },
+                {
+                    "jornada": 13,
+                    "date_time": "2025-02-02 18:00:00",
+                    "club_home_id": 14,
+                    "club_visitor_id": 1,
+                    "pavilion_id": 14,
+                    "finished": False
+                },
+                {
+                    "jornada": 14,
+                    "date_time": "2025-02-08 16:00:00",
+                    "club_home_id": 2,
+                    "club_visitor_id": 1,
+                    "pavilion_id": 2,
+                    "finished": False
+                },
+                {
+                    "jornada": 15,
+                    "date_time": "2025-02-22 22:00:00",
+                    "club_home_id": 1,
+                    "club_visitor_id": 4,
+                    "pavilion_id": 1,
+                    "finished": False
+                },
+                {
+                    "jornada": 16,
+                    "date_time": "2025-03-02 15:00:00",
+                    "club_home_id": 8,
+                    "club_visitor_id": 1,
+                    "pavilion_id": 8,
+                    "finished": False
+                },
+                {
+                    "jornada": 17,
+                    "date_time": "2025-03-04 22:00:00",
+                    "club_home_id": 1,
+                    "club_visitor_id": 6,
+                    "pavilion_id": 1,
+                    "finished": False
+                }
             ]
         # Adiciona jogos ao banco de dados
         for game_data in games:
