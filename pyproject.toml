@@ -36,7 +36,7 @@ packages = [
     { include = "models" },
     { include = "routers" },
     { include = "schemas" },
-    { include = "tests" }
+    { include = "tests" },
 ]
 
 [build-system]
